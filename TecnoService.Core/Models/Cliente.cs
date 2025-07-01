@@ -1,0 +1,20 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace TecnoService.Core.Models
+{
+    public class Cliente
+    {
+        [Key]
+        public int IDCliente { get; set; }
+        public int IDPersona { get; set; }
+        public string Telefono { get; set; }
+
+        public Persona Persona { get; set; }
+        public ICollection<InDis> Ingreso { get; set; }
+    }
+}
