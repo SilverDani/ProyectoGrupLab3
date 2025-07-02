@@ -10,98 +10,193 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using TecnoService.Core.DTOs;
+using TecnoService.Core.DTOs.GetAll;
+using TecnoService.Core.DTOs.GetById;
 using TecnoService.Core.Models;
 
 namespace TecnoService.Desktop.Ventanas
 {
     public partial class AdmTrabajadores : Form
     {
-        public AdmTrabajadores()
-        {
-            InitializeComponent();
-        }
-
         private readonly HttpClient httpClient = new HttpClient
         {
             BaseAddress = new Uri("https://localhost:7089/")
         };
 
-        private Persona personaSeleccionada;
-        private Trabajador trabajadorSeleccionado;
+        private int? idPersonaSeleccionada = null;
+        private int? idTrabajadorSeleccionado = null;
+
+        public AdmTrabajadores()
+        {
+            InitializeComponent();
+            this.Load += AdmTrabajadores_Load;
+        }
 
         private async void AdmTrabajadores_Load(object sender, EventArgs e)
         {
-            await CargarPersonas();
+            await CargarPersonasDisponibles();
             await CargarTrabajadores();
         }
 
-        private async Task CargarPersonas()
+        private async Task CargarPersonasDisponibles()
         {
-            var personas = await httpClient.GetFromJsonAsync<List<Persona>>("https://localhost:7089/api/persona");
-            dgvPersonas.DataSource = personas;
+            try
+            {
+                var personas = await httpClient.GetFromJsonAsync<List<PersonaDisponibleDTO>>("api/persona/disponibles");
+                dgvPersonas.AutoGenerateColumns = true;
+                dgvPersonas.DataSource = personas;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al cargar personas disponibles: {ex.Message}");
+            }
         }
 
         private async Task CargarTrabajadores()
         {
-            var trabajadores = await httpClient.GetFromJsonAsync<List<Trabajador>>("https://localhost:7089/api/trabajador");
-            dgvTrabajadores.DataSource = trabajadores;
+            try
+            {
+                var trabajadores = await httpClient.GetFromJsonAsync<List<TrabajadorResumenDTO>>("api/trabajador/resumen");
+                dgvTrabajadores.AutoGenerateColumns = true;
+                dgvTrabajadores.DataSource = trabajadores;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al cargar trabajadores: {ex.Message}");
+            }
         }
 
         private void dgvPersonas_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            personaSeleccionada = (Persona)dgvPersonas.CurrentRow.DataBoundItem;
-            txtNombre.Text = personaSeleccionada.Nombre;
-            txtApellido.Text = personaSeleccionada.Apellido;
-            txtDocumento.Text = personaSeleccionada.Documento;
+            if (e.RowIndex >= 0)
+            {
+                var persona = (PersonaDisponibleDTO)dgvPersonas.Rows[e.RowIndex].DataBoundItem;
+                idPersonaSeleccionada = persona.IDPersona;
+
+                txtNombre.Text = persona.NombreCompleto.Split(' ').FirstOrDefault();
+                txtApellido.Text = persona.NombreCompleto.Split(' ').LastOrDefault();
+                txtDocumento.Text = persona.Documento;
+
+                txtNombre.Enabled = false;
+                txtApellido.Enabled = false;
+                txtDocumento.Enabled = false;
+            }
         }
 
-        private void dgvTrabajadores_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        private async void dgvTrabajadores_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            trabajadorSeleccionado = (Trabajador)dgvTrabajadores.CurrentRow.DataBoundItem;
-            txtCorreo.Text = trabajadorSeleccionado.Email;
-            txtDireccion.Text = trabajadorSeleccionado.Telefono;
-            dtpFechaNac.Value = trabajadorSeleccionado.FechaNacimiento;
+            if (e.RowIndex >= 0)
+            {
+                var seleccionado = (TrabajadorResumenDTO)dgvTrabajadores.Rows[e.RowIndex].DataBoundItem;
+                idTrabajadorSeleccionado = seleccionado.IDTrabajador;
+
+                var trabajador = await httpClient.GetFromJsonAsync<TrabajadorDetalleDTO>($"api/trabajador/{idTrabajadorSeleccionado}");
+
+                txtCorreo.Text = trabajador.Email;
+                txtDireccion.Text = trabajador.Telefono;
+                dtpFechaNac.Value = trabajador.FechaNacimiento;
+            }
         }
 
         private async void btnNuevo_Click(object sender, EventArgs e)
         {
-            if (personaSeleccionada == null) return;
-
-            var dto = new CrearTrabajadorDTO
+            if (idPersonaSeleccionada == null)
             {
-                IDPersona = personaSeleccionada.IDPersona,
+                MessageBox.Show("Seleccione una persona disponible.");
+                return;
+            }
+
+            var nuevo = new CrearTrabajadorDTO
+            {
+                IDPersona = idPersonaSeleccionada.Value,
                 Email = txtCorreo.Text,
                 Telefono = txtDireccion.Text,
                 FechaNacimiento = dtpFechaNac.Value
             };
 
-            await httpClient.PostAsJsonAsync("https://localhost:7089/api/trabajador", dto);
-            await CargarTrabajadores();
+            var res = await httpClient.PostAsJsonAsync("api/trabajador", nuevo);
+
+            if (res.IsSuccessStatusCode)
+            {
+                MessageBox.Show("Trabajador creado.");
+                LimpiarCampos();
+                await CargarPersonasDisponibles();
+                await CargarTrabajadores();
+            }
+            else
+            {
+                MessageBox.Show("Error al crear trabajador.");
+            }
         }
 
         private async void btnModificar_Click(object sender, EventArgs e)
         {
-            if (trabajadorSeleccionado == null) return;
-
-            var dto = new ActualizarTrabajadorDTO
+            if (idTrabajadorSeleccionado == null)
             {
-                IDTrabajador = trabajadorSeleccionado.IDTrabajador,
-                IDPersona = trabajadorSeleccionado.IDPersona,
+                MessageBox.Show("Seleccione un trabajador para modificar.");
+                return;
+            }
+
+            var actualizar = new ActualizarTrabajadorDTO
+            {
+                IDTrabajador = idTrabajadorSeleccionado.Value,
                 Email = txtCorreo.Text,
                 Telefono = txtDireccion.Text,
-                FechaNacimiento = trabajadorSeleccionado.FechaNacimiento
+                FechaNacimiento = dtpFechaNac.Value
             };
 
-            await httpClient.PutAsJsonAsync($"https://localhost:7089/api/trabajador/{dto.IDTrabajador}", dto);
-            await CargarTrabajadores();
+            var res = await httpClient.PutAsJsonAsync($"api/trabajador/{actualizar.IDTrabajador}", actualizar);
+
+            if (res.IsSuccessStatusCode)
+            {
+                MessageBox.Show("Trabajador actualizado.");
+                LimpiarCampos();
+                await CargarTrabajadores();
+            }
+            else
+            {
+                MessageBox.Show("Error al actualizar trabajador.");
+            }
         }
 
         private async void btnEliminar_Click(object sender, EventArgs e)
         {
-            if (trabajadorSeleccionado == null) return;
+            if (idTrabajadorSeleccionado == null)
+            {
+                MessageBox.Show("Seleccione un trabajador para eliminar.");
+                return;
+            }
 
-            await httpClient.DeleteAsync($"https://localhost:7089/api/trabajador/{trabajadorSeleccionado.IDTrabajador}");
-            await CargarTrabajadores();
+            var confirm = MessageBox.Show("¿Está seguro de eliminar al trabajador?", "Confirmar", MessageBoxButtons.YesNo);
+            if (confirm != DialogResult.Yes) return;
+
+            var res = await httpClient.DeleteAsync($"api/trabajador/{idTrabajadorSeleccionado}");
+
+            if (res.IsSuccessStatusCode)
+            {
+                MessageBox.Show("Trabajador eliminado.");
+                LimpiarCampos();
+                await CargarTrabajadores();
+                await CargarPersonasDisponibles();
+            }
+            else
+            {
+                MessageBox.Show("Error al eliminar trabajador.");
+            }
+        }
+
+        private void LimpiarCampos()
+        {
+            idTrabajadorSeleccionado = null;
+            idPersonaSeleccionada = null;
+
+            txtNombre.Text = "";
+            txtApellido.Text = "";
+            txtDocumento.Text = "";
+
+            txtCorreo.Text = "";
+            txtDireccion.Text = "";
+            dtpFechaNac.Value = DateTime.Now;
         }
 
         private void btnCerrar_Click(object sender, EventArgs e)

@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TecnoService.Core.DTOs;
+using TecnoService.Core.DTOs.GetAll;
+using TecnoService.Core.DTOs.GetById;
 using TecnoService.Core.Interfaces.Service;
 using TecnoService.Core.Models;
 using TecnoService.Infraestructure.Data;
@@ -26,31 +28,49 @@ namespace TecnoService.Api.Controllers
             return Ok(InDiss);
         }
 
-        [HttpGet("detalle")]
-        public async Task<IActionResult> GetConDetalle()
+        [HttpGet("resumen")]
+        public async Task<IActionResult> GetResumen()
         {
-            var indis = await con.Ingreso
-                .Include(i => i.Dispositivo)
-                    .ThenInclude(d => d.Marca)
-                .Include(i => i.Cliente)
-                    .ThenInclude(c => c.Persona)
+            var ingresos = await con.Ingreso
+                .Include(i => i.Dispositivo).ThenInclude(d => d.Marca)
+                .Include(i => i.Cliente).ThenInclude(c => c.Persona)
+                .Where(i => i.Factura == null)
+                .Select(i => new InDisResumenDTO
+                {
+                    IDInDis = i.IDInDis,
+                    Marca = i.Dispositivo.Marca.Nombre,
+                    Modelo = i.Dispositivo.Modelo,
+                    Cliente = i.Cliente.Persona.Nombre + " " + i.Cliente.Persona.Apellido
+                })
                 .ToListAsync();
 
-            return Ok(indis);
+            return Ok(ingresos);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var InDis = await InDisServ.GetByIdAsync(id);
-            if (InDis == null)
+            var i = await con.Ingreso
+        .Include(x => x.Dispositivo).ThenInclude(d => d.Marca)
+        .Include(x => x.Cliente).ThenInclude(c => c.Persona)
+        .FirstOrDefaultAsync(x => x.IDInDis == id);
+
+            if (i == null) return NotFound();
+
+            var dto = new InDisDetalleDTO
             {
-                return NotFound();
-            }
+                IDInDis = i.IDInDis,
+                Marca = i.Dispositivo.Marca.Nombre,
+                Modelo = i.Dispositivo.Modelo,
+                ClienteNombre = i.Cliente.Persona.Nombre,
+                ClienteApellido = i.Cliente.Persona.Apellido,
+                DocumentoCliente = i.Cliente.Persona.Documento,
+                FechaIngreso = i.FechaIngreso
+            };
 
-            return Ok(InDis);
+            return Ok(dto);
         }
-
+        
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CrearInDisDTO dto
             )

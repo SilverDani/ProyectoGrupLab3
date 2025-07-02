@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TecnoService.Core.DTOs
+namespace TecnoService.Core.DTOs.GetAll
 {
-    public class InDisDetalleDTO
+    public class InDisResumenDTO
     {
         public int IDInDis { get; set; }
         public string Marca { get; set; }

@@ -1,37 +1,64 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TecnoService.Core.DTOs;
+using TecnoService.Core.DTOs.GetAll;
+using TecnoService.Core.DTOs.GetById;
 using TecnoService.Core.Interfaces.Service;
 using TecnoService.Core.Models;
+using TecnoService.Infraestructure.Data;
 
 namespace TecnoService.Api.Controllers
 {
     [ApiController]
-    [Route("Api/[Controller]")]
+    [Route("api/[Controller]")]
     public class TrabajadorController : ControllerBase
     {
         private readonly ITrabajadorService TrabajadorServ;
-        public TrabajadorController(ITrabajadorService TrabajadorServicio)
+        private readonly ServiceContext con;
+        public TrabajadorController(ITrabajadorService TrabajadorServicio, ServiceContext context)
         {
             TrabajadorServ = TrabajadorServicio;
+            con = context;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
+        
+        [HttpGet("resumen")]
+        public async Task<IActionResult> GetResumen()
         {
-            var Trabajadors = await TrabajadorServ.GetAllAsync();
-            return Ok(Trabajadors);
+            var trabajadores = await con.Trabajadores
+        .Include(t => t.Persona)
+        .Select(t => new TrabajadorResumenDTO
+        {
+            IDTrabajador = t.IDTrabajador,
+            NombreCompleto = t.Persona.Nombre + " " + t.Persona.Apellido
+        })
+        .ToListAsync();
+
+            return Ok(trabajadores);
         }
 
+        
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var Trabajador = await TrabajadorServ.GetByIdAsync(id);
-            if (Trabajador == null)
-            {
-                return NotFound();
-            }
+            var t = await con.Trabajadores
+        .Include(t => t.Persona)
+        .FirstOrDefaultAsync(t => t.IDTrabajador == id);
 
-            return Ok(Trabajador);
+            if (t == null) return NotFound();
+
+            var dto = new TrabajadorDetalleDTO
+            {
+                IDTrabajador = t.IDTrabajador,
+                Nombre = t.Persona.Nombre,
+                Apellido = t.Persona.Apellido,
+                Documento = t.Persona.Documento,
+                Email = t.Email,
+                Telefono = t.Telefono,
+                FechaNacimiento = t.FechaNacimiento
+            };
+
+            return Ok(dto);
         }
 
         [HttpPost]
@@ -74,8 +101,17 @@ namespace TecnoService.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            await TrabajadorServ.DeleteAsync(id);
+            var t = await con.Trabajadores
+                .Include(t => t.Facturas)
+                .FirstOrDefaultAsync(t => t.IDTrabajador == id);
 
+            if (t == null) return NotFound();
+
+            if (t.Facturas.Any())
+                return BadRequest("No se puede eliminar el trabajador porque tiene facturas asociadas.");
+
+            con.Trabajadores.Remove(t);
+            await con.SaveChangesAsync();
             return NoContent();
         }
 

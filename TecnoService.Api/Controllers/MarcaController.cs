@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TecnoService.Core.DTOs;
+using TecnoService.Core.DTOs.GetAll;
 using TecnoService.Core.Interfaces.Service;
 using TecnoService.Core.Models;
+using TecnoService.Infraestructure.Data;
 
 namespace TecnoService.Api.Controllers
 {
@@ -10,28 +13,41 @@ namespace TecnoService.Api.Controllers
     public class MarcaController : ControllerBase
     {
         private readonly IMarcaService MarcaServ;
-        public MarcaController(IMarcaService MarcaServicio)
+        private readonly ServiceContext con;
+        public MarcaController(IMarcaService MarcaServicio, ServiceContext context)
         {
             MarcaServ = MarcaServicio;
+            con=context;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var marcas = await MarcaServ.GetAllAsync();
+            var marcas = await con.Marcas
+        .Select(m => new MarcaResumenDTO
+        {
+            IDMarca = m.IDMarca,
+            Nombre = m.Nombre
+        })
+        .ToListAsync();
+
             return Ok(marcas);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var marca = await MarcaServ.GetByIdAsync(id);
-            if (marca == null)
-            {
-                return NotFound();
-            }
+            var marca = await con.Marcas.FindAsync(id);
 
-            return Ok(marca);
+            if (marca == null) return NotFound();
+
+            var dto = new MarcaResumenDTO 
+            {
+                IDMarca = marca.IDMarca,
+                Nombre = marca.Nombre
+            };
+
+            return Ok(dto);
         }
 
         [HttpPost]
@@ -70,7 +86,17 @@ namespace TecnoService.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            await MarcaServ.DeleteAsync(id);
+            var marca = await con.Marcas
+                .Include(m => m.Dispositivos)
+                .FirstOrDefaultAsync(m => m.IDMarca == id);
+
+            if (marca == null) return NotFound();
+
+            if (marca.Dispositivos.Any())
+                return BadRequest("No se puede eliminar la marca porque tiene dispositivos asociados.");
+
+            con.Marcas.Remove(marca);
+            await con.SaveChangesAsync();
 
             return NoContent();
         }

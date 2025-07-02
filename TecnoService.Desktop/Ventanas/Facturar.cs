@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using TecnoService.Core.DTOs;
+using TecnoService.Core.DTOs.GetAll;
 using TecnoService.Core.Models;
 using TecnoService.Desktop.viewModel;
 
@@ -58,18 +59,11 @@ namespace TecnoService.Desktop.Ventanas
         {
             try
             {
-                var ingresos = await httpClient.GetFromJsonAsync<List<InDis>>("api/indis/detalle");
-                var vista = ingresos
-                    .Where(i => i.Factura == null && i.Dispositivo != null && i.Cliente?.Persona != null)
-                    .Select(i => new IngresoView
-                    {
-                        IDInDis = i.IDInDis,
-                        Marca = i.Dispositivo.Marca?.Nombre ?? "[Sin marca]",
-                        Modelo = i.Dispositivo.Modelo ?? "[Sin modelo]",
-                        Cliente = $"{i.Cliente.Persona?.Nombre} {i.Cliente.Persona?.Apellido}"
-                    }).ToList();
+                var ingresos = await httpClient.GetFromJsonAsync<List<InDisResumenDTO>>("api/indis/resumen");
+                dgvDisIngresados.AutoGenerateColumns = true;
 
-                dgvDisIngresados.DataSource = vista;
+
+                dgvDisIngresados.DataSource = ingresos;
             }
             catch (Exception ex)
             {
@@ -82,15 +76,12 @@ namespace TecnoService.Desktop.Ventanas
         {
             try
             {
-                var trabajadores = await httpClient.GetFromJsonAsync<List<Trabajador>>("api/trabajador");
 
-                var lista = trabajadores.Select(t => new TrabajadorView
-                {
-                    IDTrabajador = t.IDTrabajador,
-                    NombreCompleto = $"{t.Persona?.Nombre} {t.Persona?.Apellido}"
-                }).ToList();
+                var tecnicos = await httpClient.GetFromJsonAsync<List<TrabajadorResumenDTO>>("api/trabajador/resumen");
+                dgvTecnicos.AutoGenerateColumns = true;
+                dgvTecnicos.DataSource = tecnicos;
 
-                dgvTecnicos.DataSource = lista;
+                
             }
             catch (Exception ex)
             {
@@ -103,9 +94,11 @@ namespace TecnoService.Desktop.Ventanas
         {
             if (e.RowIndex >= 0)
             {
-                var seleccionado = (TrabajadorView)dgvTecnicos.Rows[e.RowIndex].DataBoundItem;
+                var seleccionado = (TrabajadorResumenDTO)dgvTecnicos.CurrentRow.DataBoundItem;
                 idTrabajadorSeleccionado = seleccionado.IDTrabajador;
                 txtTecnico.Text = seleccionado.NombreCompleto;
+
+             
             }
         }
 
@@ -150,6 +143,7 @@ namespace TecnoService.Desktop.Ventanas
             {
                 MessageBox.Show("Factura registrada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 LimpiarCampos();
+                await CargarIngresos();
             }
             else
             {

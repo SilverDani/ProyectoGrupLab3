@@ -1,7 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TecnoService.Core.DTOs;
+using TecnoService.Core.DTOs.GetAll;
+using TecnoService.Core.DTOs.GetById;
 using TecnoService.Core.Interfaces.Service;
 using TecnoService.Core.Models;
+using TecnoService.Infraestructure.Data;
 
 namespace TecnoService.Api.Controllers
 {
@@ -10,28 +14,62 @@ namespace TecnoService.Api.Controllers
     public class PersonaController : ControllerBase
     {
         private readonly IPersonaService PersonaServ;
-        public PersonaController(IPersonaService PersonaServicio)
+        private readonly ServiceContext con;
+        public PersonaController(IPersonaService PersonaServicio, ServiceContext context)
         {
             PersonaServ = PersonaServicio;
+            con = context;
+        }
+
+        [HttpGet("disponibles")]
+        public async Task<IActionResult> GetDisponibles()
+        {
+            var personas = await con.Personas
+                .Where(p => p.Cliente == null && p.Trabajador == null)
+                .Select(p => new PersonaDetalleDTO
+        {
+            IDPersona = p.IDPersona,
+            Nombre = p.Nombre,
+            Apellido = p.Apellido,
+            Documento = p.Documento
+        }).ToListAsync();
+
+            return Ok(personas);
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var Personas = await PersonaServ.GetAllAsync();
-            return Ok(Personas);
+            var personas = await con.Personas
+                .Select(p => new PersonaDetalleDTO
+                {
+                    IDPersona = p.IDPersona,
+                    Nombre = p.Nombre,
+                    Apellido = p.Apellido,
+                    Documento = p.Documento
+                })
+                .ToListAsync();
+
+            return Ok(personas);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var Persona = await PersonaServ.GetByIdAsync(id);
-            if (Persona == null)
-            {
-                return NotFound();
-            }
+            var persona = await con.Personas.FindAsync(id);
 
-            return Ok(Persona);
+            if (persona == null)
+                return NotFound();
+
+            var dto = new PersonaDetalleDTO
+            {
+                IDPersona = persona.IDPersona,
+                Nombre = persona.Nombre,
+                Apellido = persona.Apellido,
+                Documento = persona.Documento
+            };
+
+            return Ok(dto);
         }
 
         [HttpPost]

@@ -1,7 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TecnoService.Core.DTOs;
+using TecnoService.Core.DTOs.GetAll;
+using TecnoService.Core.DTOs.GetById;
 using TecnoService.Core.Interfaces.Service;
 using TecnoService.Core.Models;
+using TecnoService.Infraestructure.Data;
 
 namespace TecnoService.Api.Controllers
 {
@@ -10,28 +14,48 @@ namespace TecnoService.Api.Controllers
     public class DispositivoController : ControllerBase
     {
         private readonly IDispositivoService dispositivoServ;
-        public DispositivoController(IDispositivoService dispositivoServicio)
+        private readonly ServiceContext con;
+        public DispositivoController(IDispositivoService dispositivoServicio, ServiceContext context
+            )
         {
             dispositivoServ = dispositivoServicio;
+            con = context;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var dispo = await dispositivoServ.GetAllAsync();
-            return Ok(dispo);
+            var dispositivos = await con.Dispositivos
+        .Include(d => d.Marca)
+        .Select(d => new DispositivoResumenDTO
+        {
+            IDDispositivo = d.IDDispositivo,
+            Modelo = d.Modelo,
+            Marca = d.Marca.Nombre
+        })
+        .ToListAsync();
+
+            return Ok(dispositivos);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var dispo = await dispositivoServ.GetByIdAsync(id);
+            var d = await con.Dispositivos
+        .Include(x => x.Marca)
+        .FirstOrDefaultAsync(x => x.IDDispositivo == id);
 
-            if (dispo == null)
+            if (d == null) return NotFound();
+
+            var dto = new DispositivoDetalleDTO
             {
-                return NotFound();
-            }
-            return Ok(dispo);
+                IDDispositivo = d.IDDispositivo,
+                IDMarca = d.IDMarca,
+                Modelo = d.Modelo,
+                Marca = d.Marca.Nombre
+            };
+
+            return Ok(dto);
         }
 
         [HttpPost]

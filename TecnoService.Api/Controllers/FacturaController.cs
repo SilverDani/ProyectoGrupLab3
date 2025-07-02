@@ -1,7 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TecnoService.Core.DTOs;
+using TecnoService.Core.DTOs.GetAll;
+using TecnoService.Core.DTOs.GetById;
 using TecnoService.Core.Interfaces.Service;
 using TecnoService.Core.Models;
+using TecnoService.Infraestructure.Data;
 
 namespace TecnoService.Api.Controllers
 {
@@ -10,27 +14,77 @@ namespace TecnoService.Api.Controllers
     public class FacturaController : ControllerBase
     {
         private readonly IFacturaService FacturaServ;
-        public FacturaController(IFacturaService facturaServicio)
+        private readonly ServiceContext con;
+        public FacturaController(IFacturaService facturaServicio, ServiceContext context)
         {
             FacturaServ = facturaServicio;
+            con = context;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var Factura = await FacturaServ.GetAllAsync();
-            return Ok(Factura);
+            var facturas = await con.Facturas
+        .Include(f => f.ingreso)
+            .ThenInclude(i => i.Cliente)
+                .ThenInclude(c => c.Persona)
+        .Include(f => f.ingreso)
+            .ThenInclude(i => i.Dispositivo)
+                .ThenInclude(d => d.Marca)
+        .Include(f => f.Trabajador)
+            .ThenInclude(t => t.Persona)
+        .Select(f => new FacturaResumenDTO
+        {
+            IDFactura = f.IDFactura,
+            Cliente = f.ingreso.Cliente.Persona.Nombre + " " + f.ingreso.Cliente.Persona.Apellido,
+            Modelo = f.ingreso.Dispositivo.Modelo,
+            Marca = f.ingreso.Dispositivo.Marca.Nombre,
+            Tecnico = f.Trabajador.Persona.Nombre + " " + f.Trabajador.Persona.Apellido,
+            Monto = f.Monto,
+            FechaRetiro = f.FechaRetiro
+        })
+        .ToListAsync();
+
+            return Ok(facturas);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var Factura = await FacturaServ.GetByIdAsync(id);
-            if (Factura == null)
+            var f = await con.Facturas
+        .Include(x => x.ingreso)
+            .ThenInclude(i => i.Cliente)
+                .ThenInclude(c => c.Persona)
+        .Include(x => x.ingreso)
+            .ThenInclude(i => i.Dispositivo)
+                .ThenInclude(d => d.Marca)
+        .Include(x => x.Trabajador)
+            .ThenInclude(t => t.Persona)
+        .FirstOrDefaultAsync(x => x.IDFactura == id);
+
+            if (f == null) return NotFound();
+
+            var dto = new FacturaDetalleDTO
             {
-                return NotFound();
-            }
-            return Ok(Factura);
+                IDFactura = f.IDFactura,
+                IDInDis = f.IDInDis,
+                IDTrabajador = f.IDTrabajador,
+
+                ClienteNombre = f.ingreso.Cliente.Persona.Nombre,
+                ClienteApellido = f.ingreso.Cliente.Persona.Apellido,
+                DocumentoCliente = f.ingreso.Cliente.Persona.Documento,
+
+                Modelo = f.ingreso.Dispositivo.Modelo,
+                Marca = f.ingreso.Dispositivo.Marca.Nombre,
+
+                Tecnico = f.Trabajador.Persona.Nombre + " " + f.Trabajador.Persona.Apellido,
+
+                Monto = f.Monto,
+                DetalleArreglo = f.DetalleArreglo,
+                FechaRetiro = f.FechaRetiro
+            };
+
+            return Ok(dto);
         }
 
         [HttpPost]
@@ -39,15 +93,16 @@ namespace TecnoService.Api.Controllers
             var nuevaFactura = new Factura
             {
                 IDInDis = dto.IDInDis,
+                IDTrabajador = dto.IDTrabajador,
                 Monto = dto.Monto,
                 DetalleArreglo = dto.DetalleArreglo,
-                FechaRetiro = dto.FechaRetiro,
-                IDTrabajador = dto.IDTrabajador
+                FechaRetiro = dto.FechaRetiro
             };
-            await FacturaServ.AddAsync(nuevaFactura);
 
-            return CreatedAtAction(nameof(GetById
-                ), nuevaFactura);
+            con.Facturas.Add(nuevaFactura);
+            await con.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetById), new { id = nuevaFactura.IDFactura }, nuevaFactura); // ✅ Corregido
         }
 
         [HttpPut("{id}")]
@@ -74,7 +129,12 @@ namespace TecnoService.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            await FacturaServ.DeleteAsync(id);
+            var factura = await con.Facturas.FindAsync(id);
+            if (factura == null)
+                return NotFound();
+
+            con.Facturas.Remove(factura);
+            await con.SaveChangesAsync();
 
             return NoContent();
         }

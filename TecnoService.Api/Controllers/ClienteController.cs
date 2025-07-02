@@ -1,7 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TecnoService.Core.DTOs;
+using TecnoService.Core.DTOs.GetAll;
+using TecnoService.Core.DTOs.GetById;
 using TecnoService.Core.Interfaces.Service;
 using TecnoService.Core.Models;
+using TecnoService.Infraestructure.Data;
 
 namespace TecnoService.Api.Controllers
 {
@@ -10,28 +14,51 @@ namespace TecnoService.Api.Controllers
     public class ClienteController : ControllerBase
     {
         private readonly IClienteService ClienteServ;
-        public ClienteController(IClienteService ClienteServicio)
+        private readonly ServiceContext con;
+        public ClienteController(IClienteService ClienteServicio, ServiceContext context)
         {
             ClienteServ = ClienteServicio;
+            con = context;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var Clientes = await ClienteServ.GetAllAsync();
-            return Ok(Clientes);
+            var clientes = await con.Clientes
+                .Include(c => c.Persona)
+                .Select(c => new ClienteResumenDTO
+                {
+                    IDCliente = c.IDCliente,
+                    NombreCompleto = c.Persona.Nombre + " " + c.Persona.Apellido,
+                    Documento = c.Persona.Documento,
+                    Telefono = c.Telefono
+                })
+                .ToListAsync();
+
+            return Ok(clientes);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var Cliente = await ClienteServ.GetByIdAsync(id);
-            if (Cliente == null)
-            {
-                return NotFound();
-            }
+            var cliente = await con.Clientes
+        .Include(c => c.Persona)
+        .FirstOrDefaultAsync(c => c.IDCliente == id);
 
-            return Ok(Cliente);
+            if (cliente == null)
+                return NotFound();
+
+            var dto = new ClienteDetalleDTO
+            {
+                IDCliente = cliente.IDCliente,
+                IDPersona = cliente.IDPersona,
+                Nombre = cliente.Persona.Nombre,
+                Apellido = cliente.Persona.Apellido,
+                Documento = cliente.Persona.Documento,
+                Telefono = cliente.Telefono
+            };
+
+            return Ok(dto);
         }
 
         [HttpPost]
@@ -72,7 +99,17 @@ namespace TecnoService.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            await ClienteServ.DeleteAsync(id);
+            var cliente = await con.Clientes
+        .Include(c => c.Ingreso)
+        .FirstOrDefaultAsync(c => c.IDCliente == id);
+
+            if (cliente == null) return NotFound();
+
+            if (cliente.Ingreso.Any())
+                return BadRequest("No se puede eliminar el cliente porque tiene ingresos asociados.");
+
+            con.Clientes.Remove(cliente);
+            await con.SaveChangesAsync();
 
             return NoContent();
         }

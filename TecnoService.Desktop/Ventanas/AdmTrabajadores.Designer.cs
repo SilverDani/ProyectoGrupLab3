@@ -31,23 +31,23 @@
             panel1 = new Panel();
             btnCerrar = new PictureBox();
             panel2 = new Panel();
+            btnEliminar = new Button();
+            btnModificar = new Button();
+            btnNuevo = new Button();
+            dtpFechaNac = new DateTimePicker();
+            txtDocumento = new TextBox();
+            label6 = new Label();
+            label3 = new Label();
+            txtDireccion = new TextBox();
+            label5 = new Label();
+            txtApellido = new TextBox();
+            txtCorreo = new TextBox();
+            label2 = new Label();
+            label4 = new Label();
+            txtNombre = new TextBox();
+            label1 = new Label();
             dgvTrabajadores = new DataGridView();
             dgvPersonas = new DataGridView();
-            label1 = new Label();
-            txtNombre = new TextBox();
-            label2 = new Label();
-            txtApellido = new TextBox();
-            label3 = new Label();
-            txtDocumento = new TextBox();
-            label4 = new Label();
-            txtCorreo = new TextBox();
-            label5 = new Label();
-            txtDireccion = new TextBox();
-            label6 = new Label();
-            dtpFechaNac = new DateTimePicker();
-            btnNuevo = new Button();
-            btnModificar = new Button();
-            btnEliminar = new Button();
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)btnCerrar).BeginInit();
             panel2.SuspendLayout();
@@ -102,6 +102,152 @@
             panel2.Size = new Size(1039, 738);
             panel2.TabIndex = 1;
             // 
+            // btnEliminar
+            // 
+            btnEliminar.Font = new Font("Times New Roman", 12F);
+            btnEliminar.Location = new Point(797, 336);
+            btnEliminar.Name = "btnEliminar";
+            btnEliminar.Size = new Size(143, 46);
+            btnEliminar.TabIndex = 6;
+            btnEliminar.Text = "Eliminar";
+            btnEliminar.UseVisualStyleBackColor = true;
+            btnEliminar.Click += btnEliminar_Click;
+            // 
+            // btnModificar
+            // 
+            btnModificar.Font = new Font("Times New Roman", 12F);
+            btnModificar.Location = new Point(626, 336);
+            btnModificar.Name = "btnModificar";
+            btnModificar.Size = new Size(143, 46);
+            btnModificar.TabIndex = 5;
+            btnModificar.Text = "Modificar";
+            btnModificar.UseVisualStyleBackColor = true;
+            btnModificar.Click += btnModificar_Click;
+            // 
+            // btnNuevo
+            // 
+            btnNuevo.Font = new Font("Times New Roman", 12F);
+            btnNuevo.Location = new Point(445, 336);
+            btnNuevo.Name = "btnNuevo";
+            btnNuevo.Size = new Size(143, 46);
+            btnNuevo.TabIndex = 4;
+            btnNuevo.Text = "Nuevo";
+            btnNuevo.UseVisualStyleBackColor = true;
+            btnNuevo.Click += btnNuevo_Click;
+            // 
+            // dtpFechaNac
+            // 
+            dtpFechaNac.Font = new Font("Times New Roman", 12F);
+            dtpFechaNac.Location = new Point(655, 236);
+            dtpFechaNac.Name = "dtpFechaNac";
+            dtpFechaNac.Size = new Size(250, 30);
+            dtpFechaNac.TabIndex = 3;
+            // 
+            // txtDocumento
+            // 
+            txtDocumento.Font = new Font("Times New Roman", 12F);
+            txtDocumento.Location = new Point(403, 236);
+            txtDocumento.Name = "txtDocumento";
+            txtDocumento.Size = new Size(246, 30);
+            txtDocumento.TabIndex = 1;
+            txtDocumento.TabStop = false;
+            // 
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Font = new Font("Times New Roman", 12F, FontStyle.Bold);
+            label6.Location = new Point(655, 208);
+            label6.Name = "label6";
+            label6.Size = new Size(185, 23);
+            label6.TabIndex = 2;
+            label6.Text = "Fecha de Nacimiento";
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Font = new Font("Times New Roman", 12F, FontStyle.Bold);
+            label3.Location = new Point(403, 204);
+            label3.Name = "label3";
+            label3.Size = new Size(105, 23);
+            label3.TabIndex = 2;
+            label3.Text = "Documento";
+            // 
+            // txtDireccion
+            // 
+            txtDireccion.Font = new Font("Times New Roman", 12F);
+            txtDireccion.Location = new Point(655, 149);
+            txtDireccion.Name = "txtDireccion";
+            txtDireccion.Size = new Size(246, 30);
+            txtDireccion.TabIndex = 1;
+            txtDireccion.TabStop = false;
+            // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Font = new Font("Times New Roman", 12F, FontStyle.Bold);
+            label5.Location = new Point(655, 117);
+            label5.Name = "label5";
+            label5.Size = new Size(90, 23);
+            label5.TabIndex = 2;
+            label5.Text = "Dirección";
+            // 
+            // txtApellido
+            // 
+            txtApellido.Font = new Font("Times New Roman", 12F);
+            txtApellido.Location = new Point(403, 149);
+            txtApellido.Name = "txtApellido";
+            txtApellido.Size = new Size(246, 30);
+            txtApellido.TabIndex = 1;
+            txtApellido.TabStop = false;
+            // 
+            // txtCorreo
+            // 
+            txtCorreo.Font = new Font("Times New Roman", 12F);
+            txtCorreo.Location = new Point(655, 56);
+            txtCorreo.Name = "txtCorreo";
+            txtCorreo.Size = new Size(246, 30);
+            txtCorreo.TabIndex = 1;
+            txtCorreo.TabStop = false;
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Font = new Font("Times New Roman", 12F, FontStyle.Bold);
+            label2.Location = new Point(403, 117);
+            label2.Name = "label2";
+            label2.Size = new Size(79, 23);
+            label2.TabIndex = 2;
+            label2.Text = "Apellido";
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Font = new Font("Times New Roman", 12F, FontStyle.Bold);
+            label4.Location = new Point(655, 24);
+            label4.Name = "label4";
+            label4.Size = new Size(70, 23);
+            label4.TabIndex = 2;
+            label4.Text = "Correo";
+            // 
+            // txtNombre
+            // 
+            txtNombre.Font = new Font("Times New Roman", 12F);
+            txtNombre.Location = new Point(403, 56);
+            txtNombre.Name = "txtNombre";
+            txtNombre.Size = new Size(246, 30);
+            txtNombre.TabIndex = 1;
+            txtNombre.TabStop = false;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Font = new Font("Times New Roman", 12F, FontStyle.Bold);
+            label1.Location = new Point(403, 24);
+            label1.Name = "label1";
+            label1.Size = new Size(77, 23);
+            label1.TabIndex = 2;
+            label1.Text = "Nombre";
+            // 
             // dgvTrabajadores
             // 
             dgvTrabajadores.AllowUserToAddRows = false;
@@ -126,152 +272,7 @@
             dgvPersonas.RowHeadersWidth = 51;
             dgvPersonas.Size = new Size(393, 420);
             dgvPersonas.TabIndex = 0;
-            // 
-            // label1
-            // 
-            label1.AutoSize = true;
-            label1.Font = new Font("Times New Roman", 12F, FontStyle.Bold);
-            label1.Location = new Point(403, 24);
-            label1.Name = "label1";
-            label1.Size = new Size(77, 23);
-            label1.TabIndex = 2;
-            label1.Text = "Nombre";
-            // 
-            // txtNombre
-            // 
-            txtNombre.Font = new Font("Times New Roman", 12F);
-            txtNombre.Location = new Point(403, 56);
-            txtNombre.Name = "txtNombre";
-            txtNombre.Size = new Size(246, 30);
-            txtNombre.TabIndex = 1;
-            txtNombre.TabStop = false;
-            // 
-            // label2
-            // 
-            label2.AutoSize = true;
-            label2.Font = new Font("Times New Roman", 12F, FontStyle.Bold);
-            label2.Location = new Point(403, 117);
-            label2.Name = "label2";
-            label2.Size = new Size(79, 23);
-            label2.TabIndex = 2;
-            label2.Text = "Apellido";
-            // 
-            // txtApellido
-            // 
-            txtApellido.Font = new Font("Times New Roman", 12F);
-            txtApellido.Location = new Point(403, 149);
-            txtApellido.Name = "txtApellido";
-            txtApellido.Size = new Size(246, 30);
-            txtApellido.TabIndex = 1;
-            txtApellido.TabStop = false;
-            // 
-            // label3
-            // 
-            label3.AutoSize = true;
-            label3.Font = new Font("Times New Roman", 12F, FontStyle.Bold);
-            label3.Location = new Point(403, 204);
-            label3.Name = "label3";
-            label3.Size = new Size(105, 23);
-            label3.TabIndex = 2;
-            label3.Text = "Documento";
-            // 
-            // txtDocumento
-            // 
-            txtDocumento.Font = new Font("Times New Roman", 12F);
-            txtDocumento.Location = new Point(403, 236);
-            txtDocumento.Name = "txtDocumento";
-            txtDocumento.Size = new Size(246, 30);
-            txtDocumento.TabIndex = 1;
-            txtDocumento.TabStop = false;
-            // 
-            // label4
-            // 
-            label4.AutoSize = true;
-            label4.Font = new Font("Times New Roman", 12F, FontStyle.Bold);
-            label4.Location = new Point(655, 24);
-            label4.Name = "label4";
-            label4.Size = new Size(70, 23);
-            label4.TabIndex = 2;
-            label4.Text = "Correo";
-            // 
-            // txtCorreo
-            // 
-            txtCorreo.Font = new Font("Times New Roman", 12F);
-            txtCorreo.Location = new Point(655, 56);
-            txtCorreo.Name = "txtCorreo";
-            txtCorreo.Size = new Size(246, 30);
-            txtCorreo.TabIndex = 1;
-            txtCorreo.TabStop = false;
-            // 
-            // label5
-            // 
-            label5.AutoSize = true;
-            label5.Font = new Font("Times New Roman", 12F, FontStyle.Bold);
-            label5.Location = new Point(655, 117);
-            label5.Name = "label5";
-            label5.Size = new Size(90, 23);
-            label5.TabIndex = 2;
-            label5.Text = "Dirección";
-            // 
-            // txtDireccion
-            // 
-            txtDireccion.Font = new Font("Times New Roman", 12F);
-            txtDireccion.Location = new Point(655, 149);
-            txtDireccion.Name = "txtDireccion";
-            txtDireccion.Size = new Size(246, 30);
-            txtDireccion.TabIndex = 1;
-            txtDireccion.TabStop = false;
-            // 
-            // label6
-            // 
-            label6.AutoSize = true;
-            label6.Font = new Font("Times New Roman", 12F, FontStyle.Bold);
-            label6.Location = new Point(655, 208);
-            label6.Name = "label6";
-            label6.Size = new Size(185, 23);
-            label6.TabIndex = 2;
-            label6.Text = "Fecha de Nacimiento";
-            // 
-            // dtpFechaNac
-            // 
-            dtpFechaNac.Font = new Font("Times New Roman", 12F);
-            dtpFechaNac.Location = new Point(655, 236);
-            dtpFechaNac.Name = "dtpFechaNac";
-            dtpFechaNac.Size = new Size(250, 30);
-            dtpFechaNac.TabIndex = 3;
-            // 
-            // btnNuevo
-            // 
-            btnNuevo.Font = new Font("Times New Roman", 12F);
-            btnNuevo.Location = new Point(445, 336);
-            btnNuevo.Name = "btnNuevo";
-            btnNuevo.Size = new Size(143, 46);
-            btnNuevo.TabIndex = 4;
-            btnNuevo.Text = "Nuevo";
-            btnNuevo.UseVisualStyleBackColor = true;
-            btnNuevo.Click += btnNuevo_Click;
-            // 
-            // btnModificar
-            // 
-            btnModificar.Font = new Font("Times New Roman", 12F);
-            btnModificar.Location = new Point(626, 336);
-            btnModificar.Name = "btnModificar";
-            btnModificar.Size = new Size(143, 46);
-            btnModificar.TabIndex = 5;
-            btnModificar.Text = "Modificar";
-            btnModificar.UseVisualStyleBackColor = true;
-            btnModificar.Click += btnModificar_Click;
-            // 
-            // btnEliminar
-            // 
-            btnEliminar.Font = new Font("Times New Roman", 12F);
-            btnEliminar.Location = new Point(797, 336);
-            btnEliminar.Name = "btnEliminar";
-            btnEliminar.Size = new Size(143, 46);
-            btnEliminar.TabIndex = 6;
-            btnEliminar.Text = "Eliminar";
-            btnEliminar.UseVisualStyleBackColor = true;
-            btnEliminar.Click += btnEliminar_Click;
+            dgvPersonas.CellDoubleClick += dgvPersonas_CellClick;
             // 
             // AdmTrabajadores
             // 
