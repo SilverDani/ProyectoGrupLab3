@@ -22,13 +22,13 @@ namespace TecnoService.Desktop.Ventanas
 
         private readonly HttpClient httpClient = new HttpClient
         {
-            BaseAddress = new Uri("https://localhost:7151/")
+            BaseAddress = new Uri("https://localhost:7089/")
         };
 
         private async void btnMarca_Click(object sender, EventArgs e)
         {
             var nueva = new CrearMarcaDTO { Nombre = txtMarca.Text };
-            await httpClient.PostAsJsonAsync("https://localhost:7151/api/marca", nueva);
+            await httpClient.PostAsJsonAsync("https://localhost:7089/api/marca", nueva);
             MessageBox.Show("Marca agregada correctamente.");
         }
 

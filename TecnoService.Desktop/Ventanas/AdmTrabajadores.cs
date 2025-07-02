@@ -23,7 +23,7 @@ namespace TecnoService.Desktop.Ventanas
 
         private readonly HttpClient httpClient = new HttpClient
         {
-            BaseAddress = new Uri("https://localhost:7151/")
+            BaseAddress = new Uri("https://localhost:7089/")
         };
 
         private Persona personaSeleccionada;
@@ -37,13 +37,13 @@ namespace TecnoService.Desktop.Ventanas
 
         private async Task CargarPersonas()
         {
-            var personas = await httpClient.GetFromJsonAsync<List<Persona>>("https://localhost:7151/api/persona");
+            var personas = await httpClient.GetFromJsonAsync<List<Persona>>("https://localhost:7089/api/persona");
             dgvPersonas.DataSource = personas;
         }
 
         private async Task CargarTrabajadores()
         {
-            var trabajadores = await httpClient.GetFromJsonAsync<List<Trabajador>>("https://localhost:7151/api/trabajador");
+            var trabajadores = await httpClient.GetFromJsonAsync<List<Trabajador>>("https://localhost:7089/api/trabajador");
             dgvTrabajadores.DataSource = trabajadores;
         }
 
@@ -75,7 +75,7 @@ namespace TecnoService.Desktop.Ventanas
                 FechaNacimiento = dtpFechaNac.Value
             };
 
-            await httpClient.PostAsJsonAsync("https://localhost:7151/api/trabajador", dto);
+            await httpClient.PostAsJsonAsync("https://localhost:7089/api/trabajador", dto);
             await CargarTrabajadores();
         }
 
@@ -92,7 +92,7 @@ namespace TecnoService.Desktop.Ventanas
                 FechaNacimiento = trabajadorSeleccionado.FechaNacimiento
             };
 
-            await httpClient.PutAsJsonAsync($"https://localhost:7151/api/trabajador/{dto.IDTrabajador}", dto);
+            await httpClient.PutAsJsonAsync($"https://localhost:7089/api/trabajador/{dto.IDTrabajador}", dto);
             await CargarTrabajadores();
         }
 
@@ -100,7 +100,7 @@ namespace TecnoService.Desktop.Ventanas
         {
             if (trabajadorSeleccionado == null) return;
 
-            await httpClient.DeleteAsync($"https://localhost:7151/api/trabajador/{trabajadorSeleccionado.IDTrabajador}");
+            await httpClient.DeleteAsync($"https://localhost:7089/api/trabajador/{trabajadorSeleccionado.IDTrabajador}");
             await CargarTrabajadores();
         }
 

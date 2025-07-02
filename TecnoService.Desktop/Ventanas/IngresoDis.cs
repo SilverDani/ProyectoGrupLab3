@@ -23,12 +23,12 @@ namespace TecnoService.Desktop.Ventanas
 
         private readonly HttpClient httpClient = new HttpClient
         {
-            BaseAddress = new Uri("https://localhost:7151/")
+            BaseAddress = new Uri("https://localhost:7089/")
         };
 
         private async void IngresoDis_Load(object sender, EventArgs e)
         {
-            var marcas = await httpClient.GetFromJsonAsync<List<Marca>>("https://localhost:7151/api/marca");
+            var marcas = await httpClient.GetFromJsonAsync<List<Marca>>("https://localhost:7089/api/marca");
             cmbMarca.DataSource = marcas;
             cmbMarca.DisplayMember = "Nombre";
             cmbMarca.ValueMember = "IDMarca";
@@ -42,7 +42,7 @@ namespace TecnoService.Desktop.Ventanas
                 Apellido = txtApellido.Text,
                 Documento = txtDocumento.Text
             };
-            var personaRes = await httpClient.PostAsJsonAsync("https://localhost:7151/api/persona", crearPersona);
+            var personaRes = await httpClient.PostAsJsonAsync("https://localhost:7089/api/persona", crearPersona);
             var persona = await personaRes.Content.ReadFromJsonAsync<Persona>();
 
             var clienteDto = new CrearClienteDTO
@@ -50,7 +50,7 @@ namespace TecnoService.Desktop.Ventanas
                 IDPersona = persona.IDPersona,
                 Telefono = txtTelefono.Text
             };
-            var clienteRes = await httpClient.PostAsJsonAsync("https://localhost:7151/api/cliente", clienteDto);
+            var clienteRes = await httpClient.PostAsJsonAsync("https://localhost:7089/api/cliente", clienteDto);
             var cliente = await clienteRes.Content.ReadFromJsonAsync<Cliente>();
 
             var dispoDto = new CrearDispositivoDTO
@@ -58,7 +58,7 @@ namespace TecnoService.Desktop.Ventanas
                 IDMarca = (int)cmbMarca.SelectedValue,
                 Modelo = txtModelo.Text
             };
-            var dispoRes = await httpClient.PostAsJsonAsync("https://localhost:7151/api/dispositivo", dispoDto);
+            var dispoRes = await httpClient.PostAsJsonAsync("https://localhost:7089/api/dispositivo", dispoDto);
             var dispositivo = await dispoRes.Content.ReadFromJsonAsync<Dispositivo>();
 
             var ingresoDto = new CrearInDisDTO
@@ -67,7 +67,7 @@ namespace TecnoService.Desktop.Ventanas
                 IDDispositivo = dispositivo.IDDispositivo,
                 FechaIngreso = DateTime.Now
             };
-            await httpClient.PostAsJsonAsync("https://localhost:7151/api/indis", ingresoDto);
+            await httpClient.PostAsJsonAsync("https://localhost:7089/api/indis", ingresoDto);
 
             MessageBox.Show("Ingreso registrado correctamente.");
         }

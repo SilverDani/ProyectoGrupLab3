@@ -23,7 +23,7 @@ namespace TecnoService.Desktop.Ventanas
 
         private readonly HttpClient httpClient = new HttpClient
         {
-            BaseAddress = new Uri("https://localhost:7151/")
+            BaseAddress = new Uri("https://localhost:7089/")
         };
 
         private Persona personaSeleccionada;
@@ -35,7 +35,7 @@ namespace TecnoService.Desktop.Ventanas
 
         private async Task CargarPersonas()
         {
-            var personas = await httpClient.GetFromJsonAsync<List<Persona>>("https://localhost:7151/api/persona");
+            var personas = await httpClient.GetFromJsonAsync<List<Persona>>("https://localhost:7089/api/persona");
             dgvPersona.DataSource = personas;
         }
 
@@ -55,7 +55,7 @@ namespace TecnoService.Desktop.Ventanas
                 Apellido = txtApellido.Text,
                 Documento = txtDocumento.Text
             };
-            await httpClient.PostAsJsonAsync("https://localhost:7151/api/persona", dto);
+            await httpClient.PostAsJsonAsync("https://localhost:7089/api/persona", dto);
             await CargarPersonas();
         }
 
@@ -70,7 +70,7 @@ namespace TecnoService.Desktop.Ventanas
                 Apellido = txtApellido.Text,
                 Documento = txtDocumento.Text
             };
-            await httpClient.PutAsJsonAsync($"https://localhost:7151/api/persona/{dto.IDPersona}", dto);
+            await httpClient.PutAsJsonAsync($"https://localhost:7089/api/persona/{dto.IDPersona}", dto);
             await CargarPersonas();
         }
 
@@ -78,7 +78,7 @@ namespace TecnoService.Desktop.Ventanas
         {
             if (personaSeleccionada == null) return;
 
-            await httpClient.DeleteAsync($"https://localhost:7151/api/persona/{personaSeleccionada.IDPersona}");
+            await httpClient.DeleteAsync($"https://localhost:7089/api/persona/{personaSeleccionada.IDPersona}");
             await CargarPersonas();
         }
 

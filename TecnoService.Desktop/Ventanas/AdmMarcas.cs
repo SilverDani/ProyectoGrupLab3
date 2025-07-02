@@ -24,7 +24,7 @@ namespace TecnoService.Desktop.Ventanas
 
         private readonly HttpClient httpClient = new HttpClient
         {
-            BaseAddress = new Uri("https://localhost:7151/")
+            BaseAddress = new Uri("https://localhost:7089/")
         };
 
         private async void AdmMarca_Load(object sender, EventArgs e)
@@ -34,7 +34,7 @@ namespace TecnoService.Desktop.Ventanas
 
         private async Task CargarMarcas()
         {
-            var response = await httpClient.GetAsync("https://localhost:7151/api/marca");
+            var response = await httpClient.GetAsync("https://localhost:7089/api/marca");
             if (response.IsSuccessStatusCode)
             {
                 var marcas = await response.Content.ReadFromJsonAsync<List<Marca>>();
@@ -53,7 +53,7 @@ namespace TecnoService.Desktop.Ventanas
         private async void btnNuevo_Click(object sender, EventArgs e)
         {
             var nueva = new CrearMarcaDTO { Nombre = txtMarca.Text };
-            await httpClient.PostAsJsonAsync("https://localhost:7151/api/marca", nueva);
+            await httpClient.PostAsJsonAsync("https://localhost:7089/api/marca", nueva);
             await CargarMarcas();
         }
 
@@ -62,7 +62,7 @@ namespace TecnoService.Desktop.Ventanas
             if (marcaSeleccionada == null) return;
 
             var dto = new ActualizarMarcaDTO { IDMarca = marcaSeleccionada.IDMarca, Nombre = txtMarca.Text };
-            await httpClient.PutAsJsonAsync($"https://localhost:7151/api/marca/{dto.IDMarca}", dto);
+            await httpClient.PutAsJsonAsync($"https://localhost:7089/api/marca/{dto.IDMarca}", dto);
             await CargarMarcas();
         }
 
@@ -70,7 +70,7 @@ namespace TecnoService.Desktop.Ventanas
         {
             if (marcaSeleccionada == null) return;
 
-            await httpClient.DeleteAsync($"https://localhost:7151/api/marca/{marcaSeleccionada.IDMarca}");
+            await httpClient.DeleteAsync($"https://localhost:7089/api/marca/{marcaSeleccionada.IDMarca}");
             await CargarMarcas();
         }
 
