@@ -18,7 +18,7 @@ namespace TecnoService.Desktop.Ventanas
     {
         private readonly HttpClient httpClient = new HttpClient
         {
-            BaseAddress = new Uri("https://localhost:7151/")
+            BaseAddress = new Uri("https://localhost:7089/")
         };
 
         private int? idInDisSeleccionado = null;
@@ -58,15 +58,14 @@ namespace TecnoService.Desktop.Ventanas
         {
             try
             {
-                var ingresos = await httpClient.GetFromJsonAsync<List<InDis>>("api/indis");
-
+                var ingresos = await httpClient.GetFromJsonAsync<List<InDis>>("api/indis/detalle");
                 var vista = ingresos
-                    .Where(i => i.Factura == null)
+                    .Where(i => i.Factura == null && i.Dispositivo != null && i.Cliente?.Persona != null)
                     .Select(i => new IngresoView
                     {
                         IDInDis = i.IDInDis,
-                        Marca = i.Dispositivo.Marca?.Nombre,
-                        Modelo = i.Dispositivo.Modelo,
+                        Marca = i.Dispositivo.Marca?.Nombre ?? "[Sin marca]",
+                        Modelo = i.Dispositivo.Modelo ?? "[Sin modelo]",
                         Cliente = $"{i.Cliente.Persona?.Nombre} {i.Cliente.Persona?.Apellido}"
                     }).ToList();
 

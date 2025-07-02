@@ -110,6 +110,7 @@
             Controls.Add(panel1);
             FormBorderStyle = FormBorderStyle.None;
             Name = "agregarMarca";
+            StartPosition = FormStartPosition.CenterParent;
             Text = "agregarMarca";
             panel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)btnCerrar).EndInit();

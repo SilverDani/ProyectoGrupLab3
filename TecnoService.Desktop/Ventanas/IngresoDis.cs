@@ -19,6 +19,7 @@ namespace TecnoService.Desktop.Ventanas
         public IngresoDis()
         {
             InitializeComponent();
+            this.Load += IngresoDis_Load;
         }
 
         private readonly HttpClient httpClient = new HttpClient
@@ -28,10 +29,20 @@ namespace TecnoService.Desktop.Ventanas
 
         private async void IngresoDis_Load(object sender, EventArgs e)
         {
-            var marcas = await httpClient.GetFromJsonAsync<List<Marca>>("https://localhost:7089/api/marca");
-            cmbMarca.DataSource = marcas;
-            cmbMarca.DisplayMember = "Nombre";
-            cmbMarca.ValueMember = "IDMarca";
+            var marcas = await httpClient.GetFromJsonAsync<List<Marca>>("api/marca");
+            //MessageBox.Show($"Se encontraron {marcas?.Count} marcas.");
+
+
+            if (marcas != null && marcas.Any())
+            {
+                cmbMarca.DataSource = marcas;
+                cmbMarca.DisplayMember = "Nombre";
+                cmbMarca.ValueMember = "IDMarca";
+            }
+            else
+            {
+                MessageBox.Show("No se encontraron marcas en la base de datos.", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
 
         private async void btnIngresarDis_Click(object sender, EventArgs e)
@@ -42,7 +53,8 @@ namespace TecnoService.Desktop.Ventanas
                 Apellido = txtApellido.Text,
                 Documento = txtDocumento.Text
             };
-            var personaRes = await httpClient.PostAsJsonAsync("https://localhost:7089/api/persona", crearPersona);
+            var personaRes = await httpClient.PostAsJsonAsync("api/persona", crearPersona);
+            MessageBox.Show($"Persona status: {personaRes.StatusCode}");
             var persona = await personaRes.Content.ReadFromJsonAsync<Persona>();
 
             var clienteDto = new CrearClienteDTO
@@ -50,7 +62,8 @@ namespace TecnoService.Desktop.Ventanas
                 IDPersona = persona.IDPersona,
                 Telefono = txtTelefono.Text
             };
-            var clienteRes = await httpClient.PostAsJsonAsync("https://localhost:7089/api/cliente", clienteDto);
+            var clienteRes = await httpClient.PostAsJsonAsync("api/cliente", clienteDto);
+            MessageBox.Show($"Cliente status: {clienteRes.StatusCode}");
             var cliente = await clienteRes.Content.ReadFromJsonAsync<Cliente>();
 
             var dispoDto = new CrearDispositivoDTO
@@ -58,7 +71,8 @@ namespace TecnoService.Desktop.Ventanas
                 IDMarca = (int)cmbMarca.SelectedValue,
                 Modelo = txtModelo.Text
             };
-            var dispoRes = await httpClient.PostAsJsonAsync("https://localhost:7089/api/dispositivo", dispoDto);
+            var dispoRes = await httpClient.PostAsJsonAsync("api/dispositivo", dispoDto);
+            MessageBox.Show($"Dispositivo status: {dispoRes.StatusCode}");
             var dispositivo = await dispoRes.Content.ReadFromJsonAsync<Dispositivo>();
 
             var ingresoDto = new CrearInDisDTO
@@ -67,7 +81,8 @@ namespace TecnoService.Desktop.Ventanas
                 IDDispositivo = dispositivo.IDDispositivo,
                 FechaIngreso = DateTime.Now
             };
-            await httpClient.PostAsJsonAsync("https://localhost:7089/api/indis", ingresoDto);
+            var ingresoRes = await httpClient.PostAsJsonAsync("api/indis", ingresoDto);
+            MessageBox.Show($"Ingreso status: {ingresoRes.StatusCode}");
 
             MessageBox.Show("Ingreso registrado correctamente.");
         }
@@ -79,6 +94,7 @@ namespace TecnoService.Desktop.Ventanas
 
         private void btnAgregarMarca_Click(object sender, EventArgs e)
         {
+            new Ventanas.agregarMarca().ShowDialog(this);
 
         }
     }

@@ -31,16 +31,16 @@
             panel1 = new Panel();
             btnCerrar = new PictureBox();
             panel2 = new Panel();
-            dgvPersona = new DataGridView();
-            label1 = new Label();
-            label2 = new Label();
-            label3 = new Label();
-            txtNombre = new TextBox();
-            txtApellido = new TextBox();
-            txtDocumento = new TextBox();
-            btnNuevo = new Button();
-            btnModificar = new Button();
             btnEliminar = new Button();
+            btnModificar = new Button();
+            btnNuevo = new Button();
+            txtDocumento = new TextBox();
+            txtApellido = new TextBox();
+            txtNombre = new TextBox();
+            label3 = new Label();
+            label2 = new Label();
+            label1 = new Label();
+            dgvPersona = new DataGridView();
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)btnCerrar).BeginInit();
             panel2.SuspendLayout();
@@ -87,82 +87,16 @@
             panel2.Size = new Size(1382, 763);
             panel2.TabIndex = 1;
             // 
-            // dgvPersona
+            // btnEliminar
             // 
-            dgvPersona.AllowUserToAddRows = false;
-            dgvPersona.AllowUserToDeleteRows = false;
-            dgvPersona.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvPersona.Location = new Point(3, 6);
-            dgvPersona.Name = "dgvPersona";
-            dgvPersona.ReadOnly = true;
-            dgvPersona.RowHeadersWidth = 51;
-            dgvPersona.Size = new Size(717, 745);
-            dgvPersona.TabIndex = 0;
-            // 
-            // label1
-            // 
-            label1.AutoSize = true;
-            label1.Font = new Font("Times New Roman", 12F, FontStyle.Bold);
-            label1.Location = new Point(844, 76);
-            label1.Name = "label1";
-            label1.Size = new Size(77, 23);
-            label1.TabIndex = 1;
-            label1.Text = "Nombre";
-            // 
-            // label2
-            // 
-            label2.AutoSize = true;
-            label2.Font = new Font("Times New Roman", 12F, FontStyle.Bold);
-            label2.Location = new Point(844, 215);
-            label2.Name = "label2";
-            label2.Size = new Size(79, 23);
-            label2.TabIndex = 2;
-            label2.Text = "Apellido";
-            // 
-            // label3
-            // 
-            label3.AutoSize = true;
-            label3.Font = new Font("Times New Roman", 12F, FontStyle.Bold);
-            label3.Location = new Point(844, 333);
-            label3.Name = "label3";
-            label3.Size = new Size(105, 23);
-            label3.TabIndex = 3;
-            label3.Text = "Documento";
-            // 
-            // txtNombre
-            // 
-            txtNombre.Font = new Font("Times New Roman", 12F);
-            txtNombre.Location = new Point(844, 102);
-            txtNombre.Name = "txtNombre";
-            txtNombre.Size = new Size(283, 30);
-            txtNombre.TabIndex = 4;
-            // 
-            // txtApellido
-            // 
-            txtApellido.Font = new Font("Times New Roman", 12F);
-            txtApellido.Location = new Point(844, 241);
-            txtApellido.Name = "txtApellido";
-            txtApellido.Size = new Size(283, 30);
-            txtApellido.TabIndex = 5;
-            // 
-            // txtDocumento
-            // 
-            txtDocumento.Font = new Font("Times New Roman", 12F);
-            txtDocumento.Location = new Point(844, 359);
-            txtDocumento.Name = "txtDocumento";
-            txtDocumento.Size = new Size(283, 30);
-            txtDocumento.TabIndex = 6;
-            // 
-            // btnNuevo
-            // 
-            btnNuevo.Font = new Font("Times New Roman", 12F);
-            btnNuevo.Location = new Point(1139, 510);
-            btnNuevo.Name = "btnNuevo";
-            btnNuevo.Size = new Size(208, 51);
-            btnNuevo.TabIndex = 7;
-            btnNuevo.Text = "Nuevo";
-            btnNuevo.UseVisualStyleBackColor = true;
-            btnNuevo.Click += btnNuevo_Click;
+            btnEliminar.Font = new Font("Times New Roman", 12F);
+            btnEliminar.Location = new Point(1139, 648);
+            btnEliminar.Name = "btnEliminar";
+            btnEliminar.Size = new Size(208, 51);
+            btnEliminar.TabIndex = 9;
+            btnEliminar.Text = "Eliminar";
+            btnEliminar.UseVisualStyleBackColor = true;
+            btnEliminar.Click += btnEliminar_Click;
             // 
             // btnModificar
             // 
@@ -175,16 +109,82 @@
             btnModificar.UseVisualStyleBackColor = true;
             btnModificar.Click += btnModificar_Click;
             // 
-            // btnEliminar
+            // btnNuevo
             // 
-            btnEliminar.Font = new Font("Times New Roman", 12F);
-            btnEliminar.Location = new Point(1139, 648);
-            btnEliminar.Name = "btnEliminar";
-            btnEliminar.Size = new Size(208, 51);
-            btnEliminar.TabIndex = 9;
-            btnEliminar.Text = "Eliminar";
-            btnEliminar.UseVisualStyleBackColor = true;
-            btnEliminar.Click += btnEliminar_Click;
+            btnNuevo.Font = new Font("Times New Roman", 12F);
+            btnNuevo.Location = new Point(1139, 510);
+            btnNuevo.Name = "btnNuevo";
+            btnNuevo.Size = new Size(208, 51);
+            btnNuevo.TabIndex = 7;
+            btnNuevo.Text = "Nuevo";
+            btnNuevo.UseVisualStyleBackColor = true;
+            btnNuevo.Click += btnNuevo_Click;
+            // 
+            // txtDocumento
+            // 
+            txtDocumento.Font = new Font("Times New Roman", 12F);
+            txtDocumento.Location = new Point(844, 359);
+            txtDocumento.Name = "txtDocumento";
+            txtDocumento.Size = new Size(283, 30);
+            txtDocumento.TabIndex = 6;
+            // 
+            // txtApellido
+            // 
+            txtApellido.Font = new Font("Times New Roman", 12F);
+            txtApellido.Location = new Point(844, 241);
+            txtApellido.Name = "txtApellido";
+            txtApellido.Size = new Size(283, 30);
+            txtApellido.TabIndex = 5;
+            // 
+            // txtNombre
+            // 
+            txtNombre.Font = new Font("Times New Roman", 12F);
+            txtNombre.Location = new Point(844, 102);
+            txtNombre.Name = "txtNombre";
+            txtNombre.Size = new Size(283, 30);
+            txtNombre.TabIndex = 4;
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Font = new Font("Times New Roman", 12F, FontStyle.Bold);
+            label3.Location = new Point(844, 333);
+            label3.Name = "label3";
+            label3.Size = new Size(105, 23);
+            label3.TabIndex = 3;
+            label3.Text = "Documento";
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Font = new Font("Times New Roman", 12F, FontStyle.Bold);
+            label2.Location = new Point(844, 215);
+            label2.Name = "label2";
+            label2.Size = new Size(79, 23);
+            label2.TabIndex = 2;
+            label2.Text = "Apellido";
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Font = new Font("Times New Roman", 12F, FontStyle.Bold);
+            label1.Location = new Point(844, 76);
+            label1.Name = "label1";
+            label1.Size = new Size(77, 23);
+            label1.TabIndex = 1;
+            label1.Text = "Nombre";
+            // 
+            // dgvPersona
+            // 
+            dgvPersona.AllowUserToAddRows = false;
+            dgvPersona.AllowUserToDeleteRows = false;
+            dgvPersona.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvPersona.Location = new Point(3, 6);
+            dgvPersona.Name = "dgvPersona";
+            dgvPersona.ReadOnly = true;
+            dgvPersona.RowHeadersWidth = 51;
+            dgvPersona.Size = new Size(717, 745);
+            dgvPersona.TabIndex = 0;
             // 
             // AdmPersonas
             // 
@@ -195,6 +195,7 @@
             Controls.Add(panel1);
             FormBorderStyle = FormBorderStyle.None;
             Name = "AdmPersonas";
+            StartPosition = FormStartPosition.CenterParent;
             Text = "AdmPersonas";
             Load += AdmPersona_Load;
             panel1.ResumeLayout(false);

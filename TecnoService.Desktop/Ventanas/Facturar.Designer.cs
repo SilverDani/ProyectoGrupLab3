@@ -262,6 +262,7 @@
             Controls.Add(panel1);
             FormBorderStyle = FormBorderStyle.None;
             Name = "Facturar";
+            StartPosition = FormStartPosition.CenterParent;
             Text = "Facturar";
             Load += Facturar_Load;
             panel1.ResumeLayout(false);

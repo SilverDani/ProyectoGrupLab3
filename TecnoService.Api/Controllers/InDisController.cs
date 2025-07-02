@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TecnoService.Core.DTOs;
 using TecnoService.Core.Interfaces.Service;
 using TecnoService.Core.Models;
+using TecnoService.Infraestructure.Data;
 
 namespace TecnoService.Api.Controllers
 {
@@ -10,9 +12,11 @@ namespace TecnoService.Api.Controllers
     public class InDisController : ControllerBase
     {
         private readonly IInDisService InDisServ;
-        public InDisController(IInDisService InDisServicio)
+        private readonly ServiceContext con;
+        public InDisController(IInDisService InDisServicio, ServiceContext context)
         {
             InDisServ = InDisServicio;
+            con = context;
         }
 
         [HttpGet]
@@ -20,6 +24,19 @@ namespace TecnoService.Api.Controllers
         {
             var InDiss = await InDisServ.GetAllAsync();
             return Ok(InDiss);
+        }
+
+        [HttpGet("detalle")]
+        public async Task<IActionResult> GetConDetalle()
+        {
+            var indis = await con.Ingreso
+                .Include(i => i.Dispositivo)
+                    .ThenInclude(d => d.Marca)
+                .Include(i => i.Cliente)
+                    .ThenInclude(c => c.Persona)
+                .ToListAsync();
+
+            return Ok(indis);
         }
 
         [HttpGet("{id}")]
