@@ -102,7 +102,7 @@ namespace TecnoService.Api.Controllers
             con.Facturas.Add(nuevaFactura);
             await con.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetById), new { id = nuevaFactura.IDFactura }, nuevaFactura); // ✅ Corregido
+            return CreatedAtAction(nameof(GetById), new { id = nuevaFactura.IDFactura }, nuevaFactura);
         }
 
         [HttpPut("{id}")]

@@ -1,7 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Data;
-using System.Reflection.Emit;
 using TecnoService.Core.Models;
 
 namespace TecnoService.Infraestructure.Data
