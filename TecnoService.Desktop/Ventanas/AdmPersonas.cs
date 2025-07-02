@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using TecnoService.Core.DTOs;
+using TecnoService.Core.DTOs.GetById;
 using TecnoService.Core.Models;
 
 namespace TecnoService.Desktop.Ventanas
@@ -19,6 +20,7 @@ namespace TecnoService.Desktop.Ventanas
         public AdmPersonas()
         {
             InitializeComponent();
+            this.Load += AdmPersona_Load;
         }
 
         private readonly HttpClient httpClient = new HttpClient
@@ -26,7 +28,7 @@ namespace TecnoService.Desktop.Ventanas
             BaseAddress = new Uri("https://localhost:7089/")
         };
 
-        private Persona personaSeleccionada;
+        private PersonaDetalleDTO personaSeleccionada;
 
         private async void AdmPersona_Load(object sender, EventArgs e)
         {
@@ -35,13 +37,23 @@ namespace TecnoService.Desktop.Ventanas
 
         private async Task CargarPersonas()
         {
-            var personas = await httpClient.GetFromJsonAsync<List<Persona>>("https://localhost:7089/api/persona");
-            dgvPersona.DataSource = personas;
+            try
+            {
+                var personas = await httpClient.GetFromJsonAsync<List<PersonaDetalleDTO>>("api/persona");
+                dgvPersona.AutoGenerateColumns = true;
+                dgvPersona.DataSource = personas;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al cargar personas: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void dgvPersona_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            personaSeleccionada = (Persona)dgvPersona.CurrentRow.DataBoundItem;
+            if (e.RowIndex < 0) return;
+
+            personaSeleccionada = (PersonaDetalleDTO)dgvPersona.CurrentRow.DataBoundItem;
             txtNombre.Text = personaSeleccionada.Nombre;
             txtApellido.Text = personaSeleccionada.Apellido;
             txtDocumento.Text = personaSeleccionada.Documento;
@@ -51,12 +63,28 @@ namespace TecnoService.Desktop.Ventanas
         {
             var dto = new CrearPersonaDTO
             {
-                Nombre = txtNombre.Text,
-                Apellido = txtApellido.Text,
-                Documento = txtDocumento.Text
+                Nombre = txtNombre.Text.Trim(),
+                Apellido = txtApellido.Text.Trim(),
+                Documento = txtDocumento.Text.Trim()
             };
-            await httpClient.PostAsJsonAsync("https://localhost:7089/api/persona", dto);
-            await CargarPersonas();
+
+            try
+            {
+                var response = await httpClient.PostAsJsonAsync("api/persona", dto);
+                if (response.IsSuccessStatusCode)
+                {
+                    LimpiarCampos();
+                    await CargarPersonas();
+                }
+                else
+                {
+                    MessageBox.Show("Error al crear persona.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error de conexión: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private async void btnModificar_Click(object sender, EventArgs e)
@@ -66,20 +94,62 @@ namespace TecnoService.Desktop.Ventanas
             var dto = new ActualizarPersonaDTO
             {
                 IDPersona = personaSeleccionada.IDPersona,
-                Nombre = txtNombre.Text,
-                Apellido = txtApellido.Text,
-                Documento = txtDocumento.Text
+                Nombre = txtNombre.Text.Trim(),
+                Apellido = txtApellido.Text.Trim(),
+                Documento = txtDocumento.Text.Trim()
             };
-            await httpClient.PutAsJsonAsync($"https://localhost:7089/api/persona/{dto.IDPersona}", dto);
-            await CargarPersonas();
+
+            try
+            {
+                var response = await httpClient.PutAsJsonAsync($"api/persona/{dto.IDPersona}", dto);
+                if (response.IsSuccessStatusCode)
+                {
+                    LimpiarCampos();
+                    await CargarPersonas();
+                }
+                else
+                {
+                    MessageBox.Show("Error al modificar persona.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error de conexión: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private async void btnEliminar_Click(object sender, EventArgs e)
         {
             if (personaSeleccionada == null) return;
 
-            await httpClient.DeleteAsync($"https://localhost:7089/api/persona/{personaSeleccionada.IDPersona}");
-            await CargarPersonas();
+            var result = MessageBox.Show("¿Seguro que desea eliminar esta persona?", "Confirmar", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (result != DialogResult.Yes) return;
+
+            try
+            {
+                var response = await httpClient.DeleteAsync($"api/persona/{personaSeleccionada.IDPersona}");
+                if (response.IsSuccessStatusCode)
+                {
+                    LimpiarCampos();
+                    await CargarPersonas();
+                }
+                else
+                {
+                    MessageBox.Show("No se pudo eliminar la persona.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error de conexión: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void LimpiarCampos()
+        {
+            personaSeleccionada = null;
+            txtNombre.Text = "";
+            txtApellido.Text = "";
+            txtDocumento.Text = "";
         }
 
         private void btnCerrar_Click(object sender, EventArgs e)

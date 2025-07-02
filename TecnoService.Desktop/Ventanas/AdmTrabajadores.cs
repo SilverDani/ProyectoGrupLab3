@@ -42,7 +42,7 @@ namespace TecnoService.Desktop.Ventanas
         {
             try
             {
-                var personas = await httpClient.GetFromJsonAsync<List<PersonaDisponibleDTO>>("api/persona/disponibles");
+                var personas = await httpClient.GetFromJsonAsync<List<PersonaDetalleDTO>>("api/persona/disponibles");
                 dgvPersonas.AutoGenerateColumns = true;
                 dgvPersonas.DataSource = personas;
             }
@@ -70,12 +70,13 @@ namespace TecnoService.Desktop.Ventanas
         {
             if (e.RowIndex >= 0)
             {
-                var persona = (PersonaDisponibleDTO)dgvPersonas.Rows[e.RowIndex].DataBoundItem;
+                var persona = (PersonaDetalleDTO)dgvPersonas.Rows[e.RowIndex].DataBoundItem;
                 idPersonaSeleccionada = persona.IDPersona;
 
-                txtNombre.Text = persona.NombreCompleto.Split(' ').FirstOrDefault();
-                txtApellido.Text = persona.NombreCompleto.Split(' ').LastOrDefault();
-                txtDocumento.Text = persona.Documento;
+
+                txtNombre.Text = persona.Nombre ?? "";
+                txtApellido.Text = persona.Apellido ?? "";
+                txtDocumento.Text = persona.Documento ?? "";
 
                 txtNombre.Enabled = false;
                 txtApellido.Enabled = false;
@@ -106,26 +107,38 @@ namespace TecnoService.Desktop.Ventanas
                 return;
             }
 
+            if (string.IsNullOrWhiteSpace(txtCorreo.Text) || string.IsNullOrWhiteSpace(txtDireccion.Text))
+            {
+                MessageBox.Show("Debe completar el correo y el teléfono.");
+                return;
+            }
+
             var nuevo = new CrearTrabajadorDTO
             {
                 IDPersona = idPersonaSeleccionada.Value,
-                Email = txtCorreo.Text,
-                Telefono = txtDireccion.Text,
+                Email = txtCorreo.Text.Trim(),
+                Telefono = txtDireccion.Text.Trim(),
                 FechaNacimiento = dtpFechaNac.Value
             };
 
-            var res = await httpClient.PostAsJsonAsync("api/trabajador", nuevo);
-
-            if (res.IsSuccessStatusCode)
+            try
             {
-                MessageBox.Show("Trabajador creado.");
-                LimpiarCampos();
-                await CargarPersonasDisponibles();
-                await CargarTrabajadores();
+                var res = await httpClient.PostAsJsonAsync("api/trabajador", nuevo);
+                if (res.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Trabajador creado.");
+                    LimpiarCampos();
+                    await CargarPersonasDisponibles();
+                    await CargarTrabajadores();
+                }
+                else
+                {
+                    MessageBox.Show("Error al crear trabajador.");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Error al crear trabajador.");
+                MessageBox.Show($"Error de conexión: {ex.Message}");
             }
         }
 
@@ -137,25 +150,37 @@ namespace TecnoService.Desktop.Ventanas
                 return;
             }
 
+            if (string.IsNullOrWhiteSpace(txtCorreo.Text) || string.IsNullOrWhiteSpace(txtDireccion.Text))
+            {
+                MessageBox.Show("Debe completar el correo y el teléfono.");
+                return;
+            }
+
             var actualizar = new ActualizarTrabajadorDTO
             {
                 IDTrabajador = idTrabajadorSeleccionado.Value,
-                Email = txtCorreo.Text,
-                Telefono = txtDireccion.Text,
+                Email = txtCorreo.Text.Trim(),
+                Telefono = txtDireccion.Text.Trim(),
                 FechaNacimiento = dtpFechaNac.Value
             };
 
-            var res = await httpClient.PutAsJsonAsync($"api/trabajador/{actualizar.IDTrabajador}", actualizar);
-
-            if (res.IsSuccessStatusCode)
+            try
             {
-                MessageBox.Show("Trabajador actualizado.");
-                LimpiarCampos();
-                await CargarTrabajadores();
+                var res = await httpClient.PutAsJsonAsync($"api/trabajador/{actualizar.IDTrabajador}", actualizar);
+                if (res.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Trabajador actualizado.");
+                    LimpiarCampos();
+                    await CargarTrabajadores();
+                }
+                else
+                {
+                    MessageBox.Show("Error al actualizar trabajador.");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Error al actualizar trabajador.");
+                MessageBox.Show($"Error de conexión: {ex.Message}");
             }
         }
 
@@ -167,7 +192,7 @@ namespace TecnoService.Desktop.Ventanas
                 return;
             }
 
-            var confirm = MessageBox.Show("¿Está seguro de eliminar al trabajador?", "Confirmar", MessageBoxButtons.YesNo);
+            var confirm = MessageBox.Show("¿Está seguro de eliminar al trabajador?", "Confirmar", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (confirm != DialogResult.Yes) return;
 
             var res = await httpClient.DeleteAsync($"api/trabajador/{idTrabajadorSeleccionado}");

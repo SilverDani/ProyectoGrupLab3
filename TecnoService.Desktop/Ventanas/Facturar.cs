@@ -35,24 +35,11 @@ namespace TecnoService.Desktop.Ventanas
         {
             await CargarIngresos();
             await CargarTecnicos();
-        }
 
-        private void btnCerrar_Click(object sender, EventArgs e)
-        {
-            this.Close();
-        }
-
-        private void dgvDisIngresados_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex >= 0)
-            {
-                var seleccionado = (IngresoView)dgvDisIngresados.Rows[e.RowIndex].DataBoundItem;
-                idInDisSeleccionado = seleccionado.IDInDis;
-
-                txtMarca.Text = seleccionado.Marca;
-                txtModelo.Text = seleccionado.Modelo;
-                txtNombreCliente.Text = seleccionado.Cliente;
-            }
+            txtMarca.ReadOnly = true;
+            txtModelo.ReadOnly = true;
+            txtNombreCliente.ReadOnly = true;
+            txtTecnico.ReadOnly = true;
         }
 
         private async Task CargarIngresos()
@@ -60,9 +47,8 @@ namespace TecnoService.Desktop.Ventanas
             try
             {
                 var ingresos = await httpClient.GetFromJsonAsync<List<InDisResumenDTO>>("api/indis/resumen");
+
                 dgvDisIngresados.AutoGenerateColumns = true;
-
-
                 dgvDisIngresados.DataSource = ingresos;
             }
             catch (Exception ex)
@@ -71,23 +57,32 @@ namespace TecnoService.Desktop.Ventanas
             }
         }
 
-
         private async Task CargarTecnicos()
         {
             try
             {
-
                 var tecnicos = await httpClient.GetFromJsonAsync<List<TrabajadorResumenDTO>>("api/trabajador/resumen");
+
                 dgvTecnicos.AutoGenerateColumns = true;
                 dgvTecnicos.DataSource = tecnicos;
-
-                
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar los tecnicos: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error al cargar los técnicos: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
 
+        private void dgvDisIngresados_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                var seleccionado = (InDisResumenDTO)dgvDisIngresados.Rows[e.RowIndex].DataBoundItem;
+
+                idInDisSeleccionado = seleccionado.IDInDis;
+                txtMarca.Text = seleccionado.Marca;
+                txtModelo.Text = seleccionado.Modelo;
+                txtNombreCliente.Text = seleccionado.Cliente;
+            }
         }
 
         private void dgvTecnicos_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
@@ -95,10 +90,9 @@ namespace TecnoService.Desktop.Ventanas
             if (e.RowIndex >= 0)
             {
                 var seleccionado = (TrabajadorResumenDTO)dgvTecnicos.CurrentRow.DataBoundItem;
+
                 idTrabajadorSeleccionado = seleccionado.IDTrabajador;
                 txtTecnico.Text = seleccionado.NombreCompleto;
-
-             
             }
         }
 
@@ -106,25 +100,25 @@ namespace TecnoService.Desktop.Ventanas
         {
             if (idInDisSeleccionado == null)
             {
-                MessageBox.Show("Seleccione un ingreso de dispositivo.", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Debe seleccionar un dispositivo a facturar.", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             if (idTrabajadorSeleccionado == null)
             {
-                MessageBox.Show("Seleccione un técnico.", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Debe seleccionar un técnico.", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            if (!decimal.TryParse(txtMonto.Text, out decimal monto) || monto <= 0)
+            if (!decimal.TryParse(txtMonto.Text.Trim(), out decimal monto) || monto <= 0)
             {
-                MessageBox.Show("Ingrese un monto válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("El monto ingresado no es válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(txtDetalle.Text))
             {
-                MessageBox.Show("Ingrese el detalle del arreglo.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Debe ingresar un detalle del arreglo.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -137,17 +131,24 @@ namespace TecnoService.Desktop.Ventanas
                 FechaRetiro = DateTime.Now
             };
 
-            var response = await httpClient.PostAsJsonAsync("api/factura", factura);
+            try
+            {
+                var response = await httpClient.PostAsJsonAsync("api/factura", factura);
 
-            if (response.IsSuccessStatusCode)
-            {
-                MessageBox.Show("Factura registrada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                LimpiarCampos();
-                await CargarIngresos();
+                if (response.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Factura registrada exitosamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    LimpiarCampos();
+                    await CargarIngresos();
+                }
+                else
+                {
+                    MessageBox.Show("Error al registrar la factura.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Error al registrar la factura.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error al facturar: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
         }
@@ -164,6 +165,11 @@ namespace TecnoService.Desktop.Ventanas
 
             txtMonto.Text = "";
             txtDetalle.Text = "";
+        }
+
+        private void btnCerrar_Click(object sender, EventArgs e)
+        {
+            this.Close();
         }
 
         //==================

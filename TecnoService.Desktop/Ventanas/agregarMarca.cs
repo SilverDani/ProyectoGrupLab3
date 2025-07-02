@@ -27,9 +27,36 @@ namespace TecnoService.Desktop.Ventanas
 
         private async void btnMarca_Click(object sender, EventArgs e)
         {
-            var nueva = new CrearMarcaDTO { Nombre = txtMarca.Text };
-            await httpClient.PostAsJsonAsync("https://localhost:7089/api/marca", nueva);
-            MessageBox.Show("Marca agregada correctamente.");
+            var nombre = txtMarca.Text.Trim();
+
+            
+            if (string.IsNullOrWhiteSpace(nombre))
+            {
+                MessageBox.Show("Debe ingresar un nombre para la marca.", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var nueva = new CrearMarcaDTO { Nombre = nombre };
+
+            try
+            {
+                var response = await httpClient.PostAsJsonAsync("api/marca", nueva); 
+
+                if (response.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Marca agregada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    txtMarca.Clear(); 
+                    txtMarca.Focus(); 
+                }
+                else
+                {
+                    MessageBox.Show("No se pudo agregar la marca.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al intentar agregar la marca: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void btnCerrar_Click(object sender, EventArgs e)

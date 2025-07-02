@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using TecnoService.Core.DTOs;
+using TecnoService.Core.DTOs.GetAll;
 using TecnoService.Core.Models;
 
 namespace TecnoService.Desktop.Ventanas
@@ -29,62 +30,105 @@ namespace TecnoService.Desktop.Ventanas
 
         private async void IngresoDis_Load(object sender, EventArgs e)
         {
-            var marcas = await httpClient.GetFromJsonAsync<List<Marca>>("api/marca");
-            //MessageBox.Show($"Se encontraron {marcas?.Count} marcas.");
+            await CargarMarcas();
+        }
 
-
-            if (marcas != null && marcas.Any())
+        private async Task CargarMarcas()
+        {
+            try
             {
-                cmbMarca.DataSource = marcas;
-                cmbMarca.DisplayMember = "Nombre";
-                cmbMarca.ValueMember = "IDMarca";
+                var marcas = await httpClient.GetFromJsonAsync<List<MarcaResumenDTO>>("api/marca");
+
+                if (marcas != null && marcas.Any())
+                {
+                    cmbMarca.DataSource = marcas;
+                    cmbMarca.DisplayMember = "Nombre";
+                    cmbMarca.ValueMember = "IDMarca";
+                }
+                else
+                {
+                    MessageBox.Show("No se encontraron marcas en la base de datos.", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("No se encontraron marcas en la base de datos.", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show($"Error al cargar marcas: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private async void btnIngresarDis_Click(object sender, EventArgs e)
         {
-            var crearPersona = new CrearPersonaDTO
+            if (string.IsNullOrWhiteSpace(txtNombre.Text) ||
+                string.IsNullOrWhiteSpace(txtApellido.Text) ||
+                string.IsNullOrWhiteSpace(txtDocumento.Text) ||
+                string.IsNullOrWhiteSpace(txtTelefono.Text) ||
+                string.IsNullOrWhiteSpace(txtModelo.Text) ||
+                cmbMarca.SelectedValue == null)
             {
-                Nombre = txtNombre.Text,
-                Apellido = txtApellido.Text,
-                Documento = txtDocumento.Text
-            };
-            var personaRes = await httpClient.PostAsJsonAsync("api/persona", crearPersona);
-            MessageBox.Show($"Persona status: {personaRes.StatusCode}");
-            var persona = await personaRes.Content.ReadFromJsonAsync<Persona>();
+                MessageBox.Show("Todos los campos deben estar completos.", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
-            var clienteDto = new CrearClienteDTO
+            try
             {
-                IDPersona = persona.IDPersona,
-                Telefono = txtTelefono.Text
-            };
-            var clienteRes = await httpClient.PostAsJsonAsync("api/cliente", clienteDto);
-            MessageBox.Show($"Cliente status: {clienteRes.StatusCode}");
-            var cliente = await clienteRes.Content.ReadFromJsonAsync<Cliente>();
+                // Crear Persona
+                var crearPersona = new CrearPersonaDTO
+                {
+                    Nombre = txtNombre.Text.Trim(),
+                    Apellido = txtApellido.Text.Trim(),
+                    Documento = txtDocumento.Text.Trim()
+                };
+                var personaRes = await httpClient.PostAsJsonAsync("api/persona", crearPersona);
+                if (!personaRes.IsSuccessStatusCode) throw new Exception("Error al registrar la persona.");
+                var persona = await personaRes.Content.ReadFromJsonAsync<Persona>();
 
-            var dispoDto = new CrearDispositivoDTO
+                // Crear Cliente
+                var clienteDto = new CrearClienteDTO
+                {
+                    IDPersona = persona.IDPersona,
+                    Telefono = txtTelefono.Text.Trim()
+                };
+                var clienteRes = await httpClient.PostAsJsonAsync("api/cliente", clienteDto);
+                if (!clienteRes.IsSuccessStatusCode) throw new Exception("Error al registrar el cliente.");
+                var cliente = await clienteRes.Content.ReadFromJsonAsync<Cliente>();
+
+                // Crear Dispositivo
+                var dispoDto = new CrearDispositivoDTO
+                {
+                    IDMarca = (int)cmbMarca.SelectedValue,
+                    Modelo = txtModelo.Text.Trim()
+                };
+                var dispoRes = await httpClient.PostAsJsonAsync("api/dispositivo", dispoDto);
+                if (!dispoRes.IsSuccessStatusCode) throw new Exception("Error al registrar el dispositivo.");
+                var dispositivo = await dispoRes.Content.ReadFromJsonAsync<Dispositivo>();
+
+                // Crear Ingreso
+                var ingresoDto = new CrearInDisDTO
+                {
+                    IDCliente = cliente.IDCliente,
+                    IDDispositivo = dispositivo.IDDispositivo,
+                    FechaIngreso = DateTime.Now
+                };
+                var ingresoRes = await httpClient.PostAsJsonAsync("api/indis", ingresoDto);
+                if (!ingresoRes.IsSuccessStatusCode) throw new Exception("Error al registrar el ingreso.");
+
+                MessageBox.Show("Ingreso registrado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                LimpiarCampos();
+            }
+            catch (Exception ex)
             {
-                IDMarca = (int)cmbMarca.SelectedValue,
-                Modelo = txtModelo.Text
-            };
-            var dispoRes = await httpClient.PostAsJsonAsync("api/dispositivo", dispoDto);
-            MessageBox.Show($"Dispositivo status: {dispoRes.StatusCode}");
-            var dispositivo = await dispoRes.Content.ReadFromJsonAsync<Dispositivo>();
+                MessageBox.Show($"Se produjo un error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
 
-            var ingresoDto = new CrearInDisDTO
-            {
-                IDCliente = cliente.IDCliente,
-                IDDispositivo = dispositivo.IDDispositivo,
-                FechaIngreso = DateTime.Now
-            };
-            var ingresoRes = await httpClient.PostAsJsonAsync("api/indis", ingresoDto);
-            MessageBox.Show($"Ingreso status: {ingresoRes.StatusCode}");
-
-            MessageBox.Show("Ingreso registrado correctamente.");
+        private void LimpiarCampos()
+        {
+            txtNombre.Text = "";
+            txtApellido.Text = "";
+            txtDocumento.Text = "";
+            txtTelefono.Text = "";
+            txtModelo.Text = "";
+            cmbMarca.SelectedIndex = -1;
         }
 
         private void btnCerrar_Click(object sender, EventArgs e)
@@ -95,6 +139,7 @@ namespace TecnoService.Desktop.Ventanas
         private void btnAgregarMarca_Click(object sender, EventArgs e)
         {
             new Ventanas.agregarMarca().ShowDialog(this);
+            CargarMarcas();
 
         }
     }
