@@ -16,5 +16,31 @@ namespace TecnoService.Desktop
         {
             InitializeComponent();
         }
+
+        private void btnAdmPersonas_Click(object sender, EventArgs e)
+        {
+            new Ventanas.AdmPersonas().ShowDialog(this);
+        }
+
+        private void btnAdmTrabajadores_Click(object sender, EventArgs e)
+        {
+            new Ventanas.AdmTrabajadores().ShowDialog(this);
+        }
+
+        private void btnAdmMarcas_Click(object sender, EventArgs e)
+        {
+            new Ventanas.AdmMarcas().ShowDialog(this);
+
+        }
+
+        private void btnInDis_Click(object sender, EventArgs e)
+        {
+            new Ventanas.IngresoDis().ShowDialog(this);
+        }
+
+        private void btnFacturar_Click(object sender, EventArgs e)
+        {
+            new Ventanas.Facturar().ShowDialog(this);
+        }
     }
 }
